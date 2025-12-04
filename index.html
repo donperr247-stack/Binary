@@ -1,227 +1,204 @@
-import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, AlertCircle, Play, Settings } from 'lucide-react';
-
-export default function BinarySignalBot() {
-  const [broker, setBroker] = useState('');
-  const [marketType, setMarketType] = useState('');
-  const [timeframe, setTimeframe] = useState('');
-  const [pair, setPair] = useState('');
-  const [signal, setSignal] = useState(null);
-  const [analyzing, setAnalyzing] = useState(false);
-
-  const brokers = ['Pocket Option', 'IQ Option', 'Quotex'];
-  const markets = ['Real Market', 'OTC Market'];
-  const timeframes = ['1M', '5M', '15M', '30M', '1H'];
-  const pairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'BTC/USD', 'ETH/USD', 'Gold', 'Oil'];
-
-  const technicalIndicators = () => {
-    // Simulated technical analysis (random for demo)
-    const rsi = Math.random() * 100;
-    const macdSignal = Math.random() > 0.5 ? 'bullish' : 'bearish';
-    const movingAvgCross = Math.random() > 0.5 ? 'golden' : 'death';
-    const volumeTrend = Math.random() > 0.5 ? 'increasing' : 'decreasing';
-    const bollingerPosition = Math.random() > 0.66 ? 'upper' : Math.random() > 0.33 ? 'middle' : 'lower';
-    
-    return {
-      rsi,
-      macdSignal,
-      movingAvgCross,
-      volumeTrend,
-      bollingerPosition
-    };
-  };
-
-  const generateSignal = () => {
-    setAnalyzing(true);
-    setSignal(null);
-
-    setTimeout(() => {
-      const indicators = technicalIndicators();
-      
-      // Calculate "confidence" based on indicators alignment
-      let bullishScore = 0;
-      let bearishScore = 0;
-
-      if (indicators.rsi < 30) bullishScore += 2;
-      else if (indicators.rsi > 70) bearishScore += 2;
-      else if (indicators.rsi < 50) bullishScore += 1;
-      else bearishScore += 1;
-
-      if (indicators.macdSignal === 'bullish') bullishScore += 2;
-      else bearishScore += 2;
-
-      if (indicators.movingAvgCross === 'golden') bullishScore += 2;
-      else bearishScore += 2;
-
-      if (indicators.volumeTrend === 'increasing') {
-        if (bullishScore > bearishScore) bullishScore += 1;
-        else bearishScore += 1;
-      }
-
-      if (indicators.bollingerPosition === 'lower') bullishScore += 1;
-      else if (indicators.bollingerPosition === 'upper') bearishScore += 1;
-
-      const direction = bullishScore > bearishScore ? 'CALL' : 'PUT';
-      const confidence = Math.min(95, 45 + Math.abs(bullishScore - bearishScore) * 8);
-
-      setSignal({
-        direction,
-        confidence: confidence.toFixed(1),
-        indicators,
-        timestamp: new Date().toLocaleTimeString()
-      });
-      
-      setAnalyzing(false);
-    }, 2500);
-  };
-
-  const canGenerate = broker && marketType && timeframe && pair;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center justify-center gap-3">
-            <Settings className="text-blue-400" />
-            Binary Signal Bot
-          </h1>
-          <p className="text-slate-400">Educational Demo - For Practice Only</p>
-          <div className="mt-3 bg-red-900/30 border border-red-500/50 rounded-lg p-3 text-sm text-red-200">
-            <AlertCircle className="inline mr-2" size={16} />
-            Warning: Signals are simulated. Not financial advice. High risk of loss.
-          </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Signal Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">⚙️ Binary Signal Bot</h1>
+            <p class="text-slate-400">Educational Demo - For Practice Only</p>
+            <div class="mt-3 bg-red-900/30 border border-red-500/50 rounded-lg p-3 text-sm text-red-200">
+                ⚠️ Warning: Signals are simulated. Not financial advice. High risk of loss.
+            </div>
         </div>
 
-        {/* Configuration Panel */}
-        <div className="bg-slate-800/50 backdrop-blur rounded-xl p-6 mb-6 border border-slate-700">
-          <h2 className="text-xl font-semibold text-white mb-4">Configuration</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Broker</label>
-              <select 
-                value={broker} 
-                onChange={(e) => setBroker(e.target.value)}
-                className="w-full bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Broker</option>
-                {brokers.map(b => <option key={b} value={b}>{b}</option>)}
-              </select>
+        <!-- Configuration Panel -->
+        <div class="bg-slate-800/50 backdrop-blur rounded-xl p-6 mb-6 border border-slate-700">
+            <h2 class="text-xl font-semibold text-white mb-4">Configuration</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Broker</label>
+                    <select id="broker" class="w-full bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Broker</option>
+                        <option value="Pocket Option">Pocket Option</option>
+                        <option value="IQ Option">IQ Option</option>
+                        <option value="Quotex">Quotex</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Market Type</label>
+                    <select id="marketType" class="w-full bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Market</option>
+                        <option value="Real Market">Real Market</option>
+                        <option value="OTC Market">OTC Market</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Timeframe</label>
+                    <select id="timeframe" class="w-full bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Timeframe</option>
+                        <option value="1M">1M</option>
+                        <option value="5M">5M</option>
+                        <option value="15M">15M</option>
+                        <option value="30M">30M</option>
+                        <option value="1H">1H</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Trading Pair</label>
+                    <select id="pair" class="w-full bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select Pair</option>
+                        <option value="EUR/USD">EUR/USD</option>
+                        <option value="GBP/USD">GBP/USD</option>
+                        <option value="USD/JPY">USD/JPY</option>
+                        <option value="BTC/USD">BTC/USD</option>
+                        <option value="ETH/USD">ETH/USD</option>
+                        <option value="Gold">Gold</option>
+                        <option value="Oil">Oil</option>
+                    </select>
+                </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Market Type</label>
-              <select 
-                value={marketType} 
-                onChange={(e) => setMarketType(e.target.value)}
-                className="w-full bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Market</option>
-                {markets.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Timeframe</label>
-              <select 
-                value={timeframe} 
-                onChange={(e) => setTimeframe(e.target.value)}
-                className="w-full bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Timeframe</option>
-                {timeframes.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Trading Pair</label>
-              <select 
-                value={pair} 
-                onChange={(e) => setPair(e.target.value)}
-                className="w-full bg-slate-700 text-white rounded-lg px-4 py-2 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Pair</option>
-                {pairs.map(p => <option key={p} value={p}>{p}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <button
-            onClick={generateSignal}
-            disabled={!canGenerate || analyzing}
-            className="w-full mt-6 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
-          >
-            <Play size={20} />
-            {analyzing ? 'Analyzing Market...' : 'Generate Signal'}
-          </button>
+            <button id="generateBtn" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors">
+                ▶️ Generate Signal
+            </button>
         </div>
 
-        {/* Signal Display */}
-        {signal && (
-          <div className="bg-slate-800/50 backdrop-blur rounded-xl p-6 border border-slate-700">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-white">Signal Generated</h2>
-              <span className="text-sm text-slate-400">{signal.timestamp}</span>
+        <!-- Signal Display -->
+        <div id="signalDisplay" class="hidden bg-slate-800/50 backdrop-blur rounded-xl p-6 border border-slate-700">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-white">Signal Generated</h2>
+                <span id="timestamp" class="text-sm text-slate-400"></span>
             </div>
 
-            <div className={`p-6 rounded-lg mb-4 ${signal.direction === 'CALL' ? 'bg-green-900/30 border border-green-500/50' : 'bg-red-900/30 border border-red-500/50'}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {signal.direction === 'CALL' ? (
-                    <TrendingUp size={40} className="text-green-400" />
-                  ) : (
-                    <TrendingDown size={40} className="text-red-400" />
-                  )}
-                  <div>
-                    <div className={`text-3xl font-bold ${signal.direction === 'CALL' ? 'text-green-400' : 'text-red-400'}`}>
-                      {signal.direction}
+            <div id="signalCard" class="p-6 rounded-lg mb-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span id="signalIcon" class="text-5xl"></span>
+                        <div>
+                            <div id="signalDirection" class="text-3xl font-bold"></div>
+                            <div id="signalPair" class="text-sm text-slate-300"></div>
+                        </div>
                     </div>
-                    <div className="text-sm text-slate-300">{pair} - {timeframe}</div>
-                  </div>
+                    <div class="text-right">
+                        <div id="confidence" class="text-2xl font-bold text-white"></div>
+                        <div class="text-sm text-slate-400">Confidence</div>
+                    </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-white">{signal.confidence}%</div>
-                  <div className="text-sm text-slate-400">Confidence</div>
-                </div>
-              </div>
             </div>
 
-            <div className="bg-slate-700/50 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-slate-300 mb-3">Technical Analysis</h3>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-slate-400">RSI:</span>
-                  <span className="text-white ml-2">{signal.indicators.rsi.toFixed(1)}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400">MACD:</span>
-                  <span className="text-white ml-2 capitalize">{signal.indicators.macdSignal}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400">MA Cross:</span>
-                  <span className="text-white ml-2 capitalize">{signal.indicators.movingAvgCross}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400">Volume:</span>
-                  <span className="text-white ml-2 capitalize">{signal.indicators.volumeTrend}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-slate-400">Bollinger Position:</span>
-                  <span className="text-white ml-2 capitalize">{signal.indicators.bollingerPosition} band</span>
-                </div>
-              </div>
+            <div class="bg-slate-700/50 rounded-lg p-4">
+                <h3 class="text-sm font-semibold text-slate-300 mb-3">Technical Analysis</h3>
+                <div id="indicators" class="grid grid-cols-2 gap-3 text-sm"></div>
             </div>
-          </div>
-        )}
-
-        {/* Disclaimer */}
-        <div className="mt-6 text-center text-xs text-slate-500">
-          This is a simulated educational tool. Signals are randomly generated for demonstration purposes.
-          <br />
-          Binary options trading carries extreme risk. Most traders lose money.
         </div>
-      </div>
+
+        <!-- Disclaimer -->
+        <div class="mt-6 text-center text-xs text-slate-500">
+            This is a simulated educational tool. Signals are randomly generated for demonstration purposes.
+            <br>
+            Binary options trading carries extreme risk. Most traders lose money.
+        </div>
     </div>
-  );
-}
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const signalDisplay = document.getElementById('signalDisplay');
+
+        function technicalIndicators() {
+            const rsi = Math.random() * 100;
+            const macdSignal = Math.random() > 0.5 ? 'bullish' : 'bearish';
+            const movingAvgCross = Math.random() > 0.5 ? 'golden' : 'death';
+            const volumeTrend = Math.random() > 0.5 ? 'increasing' : 'decreasing';
+            const bollingerPosition = Math.random() > 0.66 ? 'upper' : Math.random() > 0.33 ? 'middle' : 'lower';
+            
+            return { rsi, macdSignal, movingAvgCross, volumeTrend, bollingerPosition };
+        }
+
+        function generateSignal() {
+            const broker = document.getElementById('broker').value;
+            const marketType = document.getElementById('marketType').value;
+            const timeframe = document.getElementById('timeframe').value;
+            const pair = document.getElementById('pair').value;
+
+            if (!broker || !marketType || !timeframe || !pair) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            generateBtn.disabled = true;
+            generateBtn.textContent = '⏳ Analyzing Market...';
+            signalDisplay.classList.add('hidden');
+
+            setTimeout(() => {
+                const indicators = technicalIndicators();
+                
+                let bullishScore = 0;
+                let bearishScore = 0;
+
+                if (indicators.rsi < 30) bullishScore += 2;
+                else if (indicators.rsi > 70) bearishScore += 2;
+                else if (indicators.rsi < 50) bullishScore += 1;
+                else bearishScore += 1;
+
+                if (indicators.macdSignal === 'bullish') bullishScore += 2;
+                else bearishScore += 2;
+
+                if (indicators.movingAvgCross === 'golden') bullishScore += 2;
+                else bearishScore += 2;
+
+                if (indicators.volumeTrend === 'increasing') {
+                    if (bullishScore > bearishScore) bullishScore += 1;
+                    else bearishScore += 1;
+                }
+
+                if (indicators.bollingerPosition === 'lower') bullishScore += 1;
+                else if (indicators.bollingerPosition === 'upper') bearishScore += 1;
+
+                const direction = bullishScore > bearishScore ? 'CALL' : 'PUT';
+                const confidence = Math.min(95, 45 + Math.abs(bullishScore - bearishScore) * 8);
+
+                // Display signal
+                document.getElementById('timestamp').textContent = new Date().toLocaleTimeString();
+                document.getElementById('signalDirection').textContent = direction;
+                document.getElementById('signalDirection').className = `text-3xl font-bold ${direction === 'CALL' ? 'text-green-400' : 'text-red-400'}`;
+                document.getElementById('signalPair').textContent = `${pair} - ${timeframe}`;
+                document.getElementById('confidence').textContent = `${confidence.toFixed(1)}%`;
+                document.getElementById('signalIcon').textContent = direction === 'CALL' ? '📈' : '📉';
+                
+                const signalCard = document.getElementById('signalCard');
+                signalCard.className = `p-6 rounded-lg mb-4 ${direction === 'CALL' ? 'bg-green-900/30 border border-green-500/50' : 'bg-red-900/30 border border-red-500/50'}`;
+
+                document.getElementById('indicators').innerHTML = `
+                    <div><span class="text-slate-400">RSI:</span><span class="text-white ml-2">${indicators.rsi.toFixed(1)}</span></div>
+                    <div><span class="text-slate-400">MACD:</span><span class="text-white ml-2 capitalize">${indicators.macdSignal}</span></div>
+                    <div><span class="text-slate-400">MA Cross:</span><span class="text-white ml-2 capitalize">${indicators.movingAvgCross}</span></div>
+                    <div><span class="text-slate-400">Volume:</span><span class="text-white ml-2 capitalize">${indicators.volumeTrend}</span></div>
+                    <div class="col-span-2"><span class="text-slate-400">Bollinger Position:</span><span class="text-white ml-2 capitalize">${indicators.bollingerPosition} band</span></div>
+                `;
+
+                signalDisplay.classList.remove('hidden');
+                generateBtn.disabled = false;
+                generateBtn.textContent = '▶️ Generate Signal';
+            }, 2500);
+        }
+
+        generateBtn.addEventListener('click', generateSignal);
+    </script>
+</body>
+</html>
